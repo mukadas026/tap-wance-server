@@ -4,6 +4,8 @@ import { tikAxiosClient } from "../../utils/axios.util";
 import { ITikSession, ITiktok } from "../../types/session.types";
 import { findUser } from "../../models/user.model";
 
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+
 export const tiktokAccountController = async (req: Request, res: Response) => {
   // req.session.tiktok = new ITikSession();
   req.session.connectedAccounts!.tiktok = new ITiktok();
@@ -23,7 +25,7 @@ export const tiktokAccountController = async (req: Request, res: Response) => {
   authURL += `?client_key=${process.env.TIKTOK_CLIENT_KEY}`;
   authURL += "&scope=user.info.basic,user.info.profile,user.info.stats,video.publish,video.list";
   authURL += "&response_type=code";
-  authURL += "&redirect_uri=http://localhost:7000/api/v1/auth/tiktok/redirect";
+  authURL += `&redirect_uri=${CLIENT_URL}/api/v1/auth/tiktok/redirect`;
   authURL += `&state=${tikState}`;
   authURL += `&code_challenge=${codeChallenge}`;
   authURL += "&code_challenge_method=S256";
@@ -35,15 +37,15 @@ export const tiktokAccountController = async (req: Request, res: Response) => {
 
 export const tiktokAccountRedirectController = async (
   req: Request<any, any, any, { code?: string; error?: string; state?: string }>,
-  res: Response
+  res: Response,
 ) => {
   const q = req.query;
   console.log(q);
 
   if (q.error) {
-    res.redirect("http://localhost:3000/connected-accounts/error");
+    res.redirect(`${CLIENT_URL}/connected-accounts/error`);
   } else if (q.state !== req.session.connectedAccounts?.tiktok?.state) {
-    res.redirect("http://localhost:3000/connected-accounts/error");
+    res.redirect(`${CLIENT_URL}/connected-accounts/error`);
   } else if (q.code) {
     try {
       const data: { [key: string]: string } = {
@@ -51,7 +53,7 @@ export const tiktokAccountRedirectController = async (
         client_secret: `${process.env.TIKTOK_CLIENT_SECRET}`,
         code: `${q.code}`,
         grant_type: `authorization_code`,
-        redirect_uri: "http://localhost:7000/api/v1/auth/tiktok/redirect",
+        redirect_uri: `${CLIENT_URL}/api/v1/auth/tiktok/redirect`,
         code_verifier: `${req.session.connectedAccounts?.tiktok?.codeVerifier}`,
       };
       const formData = new FormData();
@@ -87,10 +89,10 @@ export const tiktokAccountRedirectController = async (
       req.session.connectedAccounts!.tiktok.description = user.bio_description;
       // console.log(first)
       console.log("req.session.connectedAccounts!.tiktok", req.session.connectedAccounts!.tiktok);
-      res.redirect("http://localhost:3000/connected-accounts");
+      res.redirect(`${CLIENT_URL}/connected-accounts`);
     } catch (err) {
       console.log(err);
-      res.redirect("http://localhost:3000/connected-accounts/error");
+      res.redirect(`${CLIENT_URL}/connected-accounts/error`);
     }
   }
 };

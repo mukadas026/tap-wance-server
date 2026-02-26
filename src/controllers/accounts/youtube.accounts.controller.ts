@@ -6,7 +6,10 @@ import { v4 as uuidV4 } from "uuid";
 import { getGoogleAuthClient } from "../../utils/google.util";
 import { google } from "googleapis";
 import { IYoutube } from "../../types/session.types";
+import crypto from "crypto";
 // import { Session } from "express-session";
+
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
 export const youtubeAccountController = async (req: Request, res: Response) => {
   // req.session.google = new IGoogleSession();
@@ -35,7 +38,7 @@ export const youtubeAccountController = async (req: Request, res: Response) => {
 
 export const youtubeAccountRedirectController = async (
   req: Request<any, any, any, { code?: string; error?: string; state?: string }>,
-  res: Response
+  res: Response,
 ) => {
   // @ts-ignore
 
@@ -45,10 +48,10 @@ export const youtubeAccountRedirectController = async (
   const q = req.query;
   if (q.error) {
     console.log("q.error", q.error);
-    res.redirect("http://localhost:3000/connected-accounts/error");
+    res.redirect(`${CLIENT_URL}/connected-accounts/error`);
   } else if (q.state !== state) {
     console.log("q.state !== state", q.state, state);
-    res.redirect("http://localhost:3000/connected-accounts/error");
+    res.redirect(`${CLIENT_URL}/connected-accounts/error`);
   } else if (q.code) {
     const oAuthClient = await getGoogleAuthClient("youtube");
     console.log("q.code", q.code);
@@ -75,7 +78,7 @@ export const youtubeAccountRedirectController = async (
     // list.data.items[0];
     console.log("list", JSON.stringify(list.data, null, 2));
     if (!list.data.items) {
-      res.redirect("http://localhost:3000/connected-accounts/error");
+      res.redirect(`${CLIENT_URL}/connected-accounts/error`);
     } else {
       const current = req.session.connectedAccounts!.youtube;
       req.session.connectedAccounts!.youtube = {
@@ -88,7 +91,7 @@ export const youtubeAccountRedirectController = async (
         videos: Number(`${list.data.items![0].statistics?.videoCount}`),
       };
 
-      res.redirect("http://localhost:3000/connected-accounts");
+      res.redirect(`${CLIENT_URL}/connected-accounts`);
     }
   }
 };

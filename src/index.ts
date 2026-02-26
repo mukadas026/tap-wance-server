@@ -11,10 +11,11 @@ import { appRouter } from "./routes/index.router";
 import { getFile } from "./utils/getFile.util";
 import session from "express-session";
 import bodyParser from "body-parser";
+import { createClient } from "redis"
+import { RedisStore } from "connect-redis"
 
 const PORT = process.env.PORT || 7000;
 const MONGO_URL = process.env.MONGO_URL;
-console.log("MONGO URL", process.env.MONGO_URL);
 mongoose
   .connect(`${MONGO_URL}`, {
     dbName: "tap-wance",
@@ -43,12 +44,20 @@ app.use((req, res, next) => {
   next();
 });
 
+const redisClient = createClient()
+redisClient.connect().catch(err => console.log("redis error", err))
+
+let redisStore = new RedisStore({
+  client: redisClient,
+  prefix: "tap-wance-session:"
+})
 app.use(
   session({
+    store: redisStore,
     resave: false,
     saveUninitialized: false,
     secret: `${process.env.JWT_SECRET || "justrandomwords"}`,
-  })
+  }) as any
 );
 
 app.use(bodyParser.json());

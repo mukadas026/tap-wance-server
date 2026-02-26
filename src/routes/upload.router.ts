@@ -4,4 +4,4 @@ import multer from "multer";
 
 export const uploadRouter = Router();
 
-uploadRouter.post("/", multer().any(), uploadController);
+uploadRouter.post("/", multer().any() as any, uploadController);

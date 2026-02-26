@@ -4,6 +4,9 @@ import { addUser, findUser } from "../../../models/user.model";
 import { IGoogleSession } from "../../../types/session.types";
 import { v4 as uuidV4 } from "uuid";
 // import { Session } from "express-session";
+import crypto from "crypto";
+
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
 export const googleAuthController = async (req: Request, res: Response) => {
   // req.session.google = new IGoogleSession();
@@ -31,7 +34,7 @@ export const googleAuthController = async (req: Request, res: Response) => {
 
 export const googleAuthRedirectController = async (
   req: Request<any, any, any, { code?: string; error?: string; state?: string }>,
-  res: Response
+  res: Response,
 ) => {
   // @ts-ignore
 
@@ -40,9 +43,10 @@ export const googleAuthRedirectController = async (
   const q = req.query;
   if (q.error) {
     // console.log(q.error);
-    res.redirect("http://localhost:3000/auth/error");
+    res.redirect(`${CLIENT_URL}/auth/error`);
+
   } else if (q.state !== state) {
-    res.redirect("http://localhost:3000/auth/error");
+    res.redirect(`${CLIENT_URL}/auth/error`);
   } else if (q.code) {
     const oAuthClient = await getGoogleAuthClient("google");
     // console.log(q.code);
@@ -59,13 +63,12 @@ export const googleAuthRedirectController = async (
     // console.log("user", user);
 
     if (payload === undefined) {
-      res.redirect("http://localhost:3000/auth/error");
+      res.redirect(`${CLIENT_URL}/auth/error`);
     } else {
       const { email, name, picture } = payload;
       if (email === undefined || name === undefined || picture === undefined) {
-        res.redirect("http://localhost:3000/auth/error");
+        res.redirect(`${CLIENT_URL}/auth/error`);
       } else {
-        // console.log(payload);
         const _id = uuidV4();
         const user: IUser = {
           _id,
@@ -89,8 +92,7 @@ export const googleAuthRedirectController = async (
           // @ts-ignore
           req.session.connectedAccounts = {};
         }
-
-        res.redirect("http://localhost:3000");
+        res.redirect(`${CLIENT_URL}`);
       }
     }
   }

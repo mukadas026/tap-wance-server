@@ -9,7 +9,6 @@ const MIN_CHUNK_SIZE = 5 * 1024 * 1024;
 const MAX_CHUNK_SIZE = 64 * 1024 * 1024;
 
 const getCreatorInfo = async (req: Request) => {
-  const url = "https://open.tiktokapis.com/v2";
   const creatorInfo = await tikAxiosClient.post<{ data: ITiktokCreatorInfo }>(
     "/post/publish/creator_info/query/",
     {},
@@ -56,13 +55,11 @@ const uploadChunk = async ({
 
   const res = await fetch(url, {
     method: "PUT",
-    body: copySlice,
+    body: copySlice as any,
     headers,
   });
 
   console.log("status", res.status, res.statusText);
-  // const json = await res.json();
-  // console.log("json", json);
 };
 
 export const tikUpload = async (
@@ -83,7 +80,9 @@ export const tikUpload = async (
         post_info: {
           title: details.title,
           // privacy_level: creatorInfo.privacy_level_options?.[1],
-          privacy_level: "SELF_ONLY",
+          // privacy_level: "SELF_ONLY",
+          // privacy_level: "MUTUAL_FOLLOW_FRIENDS",
+          privacy_level: "PUBLIC_TO_EVERYONE",
           disable_duet: creatorInfo.duet_disabled,
           disable_comment: creatorInfo.comment_disabled,
           disable_stitch: creatorInfo.stitch_disabled,
@@ -104,9 +103,6 @@ export const tikUpload = async (
         },
       }
     );
-
-    console.log("Bearer", req.session.connectedAccounts?.tiktok?.tokens.access_token);
-    console.log("tikClient", tikClient.data);
 
     const uploads: Array<() => Promise<void>> = [];
 
