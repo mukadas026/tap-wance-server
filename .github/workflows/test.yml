@@ -4,6 +4,7 @@ on: [push]
 jobs:
   test-job:
     runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main'}}
     steps:
       - run: echo "Hello World"
-      - run: echo "I'm a GitHub Actions ${{github}}"
+      - run: ssh ubuntu@13.51.199.65 
