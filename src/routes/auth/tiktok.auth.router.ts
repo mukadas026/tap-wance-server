@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { tikAuthController, tikAuthRedirectController } from "../../controllers/accounts/tiktok.accounts";
+import { tiktokAccountController, tiktokAccountRedirectController } from "../../controllers/accounts/tiktok.accounts";
 
 export const tikRouter = Router();
 
-tikRouter.get("/", tikAuthController);
-tikRouter.get("/redirect", tikAuthRedirectController);
+tikRouter.get("/", tiktokAccountController);
+tikRouter.get("/redirect", tiktokAccountRedirectController);
