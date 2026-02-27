@@ -6,4 +6,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Hello World"
-      - run: echo "I'm a GitHub Actions"
+      - run: echo "I'm a GitHub Actions ${{github}}"
